@@ -29,6 +29,7 @@ export default function App() {
     }
 
     const newPost = {
+      id: Date.now(),
       title,
       content,
       image,
@@ -39,13 +40,17 @@ export default function App() {
 
     setScheduledPosts([...scheduledPosts, newPost]);
 
-    // Clear fields
+    // Reset form
     setTitle("");
     setContent("");
     setImage(null);
     setDate("");
     setTime("");
     setPlatforms([]);
+  };
+
+  const deletePost = (id) => {
+    setScheduledPosts(scheduledPosts.filter((post) => post.id !== id));
   };
 
   return (
@@ -56,12 +61,10 @@ export default function App() {
       </p>
 
       <div style={styles.mainGrid}>
-
-        {/* Left Section — Create Post */}
+        {/* Left – Create Post */}
         <div style={styles.card}>
           <h2>Create New Post</h2>
 
-          {/* Title */}
           <label>Title</label>
           <input
             style={styles.input}
@@ -70,7 +73,6 @@ export default function App() {
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          {/* Content */}
           <label>Content</label>
           <textarea
             style={styles.textarea}
@@ -79,7 +81,6 @@ export default function App() {
             onChange={(e) => setContent(e.target.value)}
           />
 
-          {/* Image Upload */}
           <label>Image (optional)</label>
           <div style={styles.imageBox}>
             {image ? (
@@ -90,7 +91,6 @@ export default function App() {
           </div>
           <input type="file" onChange={handleImageUpload} />
 
-          {/* Platforms */}
           <label style={{ marginTop: 10 }}>Platforms</label>
           <div style={styles.platforms}>
             {["Twitter/X", "Facebook", "Instagram", "LinkedIn"].map((p) => (
@@ -108,7 +108,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Date & Time */}
           <label>Date</label>
           <input
             type="date"
@@ -125,35 +124,53 @@ export default function App() {
             onChange={(e) => setTime(e.target.value)}
           />
 
-          {/* Button */}
           <button style={styles.submitBtn} onClick={handleSchedule}>
             Schedule Post
           </button>
         </div>
 
-        {/* Right Section — Scheduled Posts */}
+        {/* Right – Scheduled Posts */}
         <div style={styles.card}>
           <h2>Scheduled Posts</h2>
 
           {scheduledPosts.length === 0 ? (
             <p>No posts scheduled. Create your first post!</p>
           ) : (
-            scheduledPosts.map((post, index) => (
-              <div key={index} style={styles.postCard}>
-                <h3>{post.title}</h3>
+            scheduledPosts.map((post) => (
+              <div key={post.id} style={styles.postCard}>
+                <div style={styles.postHeader}>
+                  <h3 style={{ margin: 0 }}>{post.title}</h3>
+                  <small>
+                    {post.date}, {post.time}
+                  </small>
+                </div>
+
                 <p>{post.content}</p>
-                {post.image && <img src={post.image} style={styles.postImage} />}
-                <p>
-                  <b>Platforms:</b> {post.platforms.join(", ")}
-                </p>
-                <p>
-                  <b>Scheduled:</b> {post.date} at {post.time}
-                </p>
+
+                {post.image && (
+                  <img src={post.image} style={styles.postImage} alt="post" />
+                )}
+
+                {/* Platform tags (rounded pills) */}
+                <div style={styles.platformTagContainer}>
+                  {post.platforms.map((p, i) => (
+                    <span key={i} style={styles.platformTag}>
+                      {p}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => deletePost(post.id)}
+                  style={styles.deleteBtn}
+                >
+                  🗑
+                </button>
               </div>
             ))
           )}
         </div>
-
       </div>
     </div>
   );
@@ -162,30 +179,23 @@ export default function App() {
 /* ----------- STYLES ----------- */
 
 const styles = {
-  container: {
-    padding: 30,
-    fontFamily: "Arial",
-  },
+  container: { padding: 30, fontFamily: "Arial" },
   header: {
     textAlign: "center",
     color: "#0047B3",
     marginBottom: 5,
   },
-  subHeader: {
-    textAlign: "center",
-    color: "#555",
-    marginBottom: 30,
-  },
+  subHeader: { textAlign: "center", color: "#555", marginBottom: 30 },
   mainGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 20,
   },
   card: {
-    border: "1px solid #ddd",
+    border: "1px solid #f9efefff",
     borderRadius: 10,
     padding: 20,
-    background: "#fff",
+    background: "#180a0aff",
   },
   input: {
     width: "100%",
@@ -217,6 +227,7 @@ const styles = {
     display: "flex",
     gap: 10,
     marginBottom: 15,
+    flexWrap: "wrap",
   },
   platformBtn: {
     padding: "8px 15px",
@@ -235,16 +246,45 @@ const styles = {
     marginTop: 15,
   },
   postCard: {
+    position: "relative",
     border: "1px solid #ddd",
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 15,
+    background: "#0000009c",
+  },
+  postHeader: {
+    display: "flex",
+    justifyContent: "space-between",
     marginBottom: 10,
-    background: "#171414ff",
   },
   postImage: {
     width: "100%",
-    borderRadius: 5,
+    borderRadius: 8,
     marginTop: 10,
     marginBottom: 10,
+  },
+  platformTagContainer: {
+    display: "flex",
+    gap: 10,
+    marginTop: 10,
+  },
+  platformTag: {
+    padding: "6px 15px",
+    background: "#9bb8edff",
+    borderRadius: 20,
+    fontSize: 14,
+    display: "inline-block",
+    border: "1px solid #ccc",
+  },
+  deleteBtn: {
+    position: "absolute",
+    bottom: 15,
+    right: 15,
+    border: "none",
+    background: "transparent",
+    fontSize: 20,
+    cursor: "pointer",
+    color: "red",
   },
 };
